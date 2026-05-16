@@ -5,7 +5,9 @@
   "type": "module",
   "description": "Drive Playwright MCP from a deterministic Node.js client to validate a frontend app — no LLM involved.",
   "scripts": {
-    "app": "node app/server.mjs",
+    "app": "vite app",
+    "app:build": "vite build app",
+    "app:preview": "vite preview app --port=5173",
     "validate": "node validator/run.mjs",
     "demo": "node validator/run.mjs --start-app",
     "lint": "biome lint .",
@@ -15,13 +17,20 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@playwright/mcp": "^0.0.75"
+    "@playwright/mcp": "^0.0.75",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.15.1"
   },
   "packageManager": "pnpm@11.0.3",
   "engines": {
     "node": ">=24.0.0 <25"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.15"
+    "@biomejs/biome": "^2.4.15",
+    "@tailwindcss/vite": "^4.3.0",
+    "@vitejs/plugin-react": "^6.0.2",
+    "tailwindcss": "^4.3.0",
+    "vite": "^8.0.13"
   }
 }

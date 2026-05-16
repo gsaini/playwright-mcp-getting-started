@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+/* Dark mode is class-based (`.dark` on <html>) so the theme can be toggled
+   instantly without media-query gymnastics. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ──────────────────────────────────────────────────────────────────
+   Theme tokens. Light values live in :root, dark overrides under .dark.
+   Tailwind exposes any --color-* token as a utility class, so
+   `bg-surface`, `text-fg`, `border-border`, `bg-brand-600`, etc. all
+   work automatically.
+   ────────────────────────────────────────────────────────────────── */
+
+@theme {
+  --color-brand-50: oklch(0.97 0.02 255);
+  --color-brand-100: oklch(0.94 0.04 255);
+  --color-brand-200: oklch(0.88 0.07 255);
+  --color-brand-500: oklch(0.62 0.18 255);
+  --color-brand-600: oklch(0.55 0.20 255);
+  --color-brand-700: oklch(0.48 0.20 255);
+
+  --color-surface: oklch(1 0 0);
+  --color-surface-2: oklch(0.975 0.005 255);
+  --color-surface-3: oklch(0.95 0.005 255);
+  --color-fg: oklch(0.22 0.02 255);
+  --color-muted: oklch(0.5 0.015 255);
+  --color-border: oklch(0.91 0.01 255);
+  --color-danger: oklch(0.58 0.22 25);
+  --color-success: oklch(0.62 0.16 145);
+  --color-warning: oklch(0.78 0.16 75);
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --radius-card: 0.875rem;
+}
+
+.dark {
+  --color-surface: oklch(0.16 0.015 255);
+  --color-surface-2: oklch(0.21 0.015 255);
+  --color-surface-3: oklch(0.26 0.015 255);
+  --color-fg: oklch(0.96 0.01 255);
+  --color-muted: oklch(0.68 0.015 255);
+  --color-border: oklch(0.31 0.015 255);
+  --color-danger: oklch(0.72 0.20 25);
+  --color-success: oklch(0.78 0.16 145);
+  --color-warning: oklch(0.85 0.14 75);
+}
+
+/* Smooth transitions when toggling theme. Limited to color-related
+   properties so layout changes still feel instant. */
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+  body {
+    font-family: var(--font-sans);
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
+  }
+  *,
+  *::before,
+  *::after {
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+  /* Leave room for the sticky header when interactive elements are
+     scrolled into view (e.g. Playwright's auto-scroll on click). Without
+     this, the sticky header overlaps the just-scrolled element and the
+     click can be intercepted by the header. */
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role="radio"],
+  [role="link"],
+  [role="button"] {
+    scroll-margin-top: 96px;
+  }
+}

@@ -1,4 +1,5 @@
 node_modules/
 .playwright-mcp/
+app/dist/
 screenshots/*.png
 .DS_Store

@@ -113,7 +113,7 @@ export function findOne(nodes, role, name) {
       .join("\n");
     throw new Error(
       `no ${role} matching ${name instanceof RegExp ? name : JSON.stringify(name)}\n` +
-        `seen ${role}s:\n${sample || "  (none)"}`
+        `seen ${role}s:\n${sample || "  (none)"}`,
     );
   }
   return match;

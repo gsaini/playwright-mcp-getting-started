@@ -7,9 +7,13 @@
   },
   "files": {
     "includes": [
-      "app/**/*.{js,mjs,cjs,ts}",
-      "validator/**/*.{js,mjs,cjs,ts}",
-      "*.{js,mjs,cjs,ts,json}"
+      "app/src/**/*.{js,jsx,mjs,cjs,ts,tsx}",
+      "app/index.html",
+      "app/vite.config.js",
+      "validator/**/*.{js,jsx,mjs,cjs,ts,tsx}",
+      "*.{js,mjs,cjs,ts,json}",
+      "!app/dist",
+      "!**/node_modules"
     ]
   },
   "formatter": {
@@ -29,18 +33,29 @@
         "noParameterAssign": "error"
       },
       "suspicious": {
-        "noConsole": "off"
+        "noConsole": "off",
+        "noArrayIndexKey": "off"
       },
       "complexity": {
         "noForEach": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "warn",
+        "useUniqueElementIds": "off"
+      },
+      "a11y": {
+        "noLabelWithoutControl": "off",
+        "useKeyWithClickEvents": "off",
+        "useSemanticElements": "off"
       }
     }
   },
   "javascript": {
     "formatter": {
       "quoteStyle": "double",
+      "jsxQuoteStyle": "double",
       "semicolons": "always",
-      "trailingCommas": "es5",
+      "trailingCommas": "all",
       "arrowParentheses": "always"
     }
   },
