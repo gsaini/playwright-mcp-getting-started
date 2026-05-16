@@ -1,0 +1,27 @@
+{
+  "name": "playwright-mcp-no-llm-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Drive Playwright MCP from a deterministic Node.js client to validate a frontend app — no LLM involved.",
+  "scripts": {
+    "app": "node app/server.mjs",
+    "validate": "node validator/run.mjs",
+    "demo": "node validator/run.mjs --start-app",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "check": "biome check ."
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@playwright/mcp": "^0.0.75"
+  },
+  "packageManager": "pnpm@11.0.3",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.15"
+  }
+}

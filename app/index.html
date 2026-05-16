@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Todo Demo</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main id="app">
+      <section id="login-view" aria-labelledby="login-heading">
+        <h1 id="login-heading">Sign in</h1>
+        <form id="login-form" novalidate>
+          <label>
+            Username
+            <input id="username" name="username" autocomplete="off" />
+          </label>
+          <label>
+            Password
+            <input id="password" name="password" type="password" autocomplete="off" />
+          </label>
+          <button type="submit" id="login-submit">Sign in</button>
+          <p id="login-error" role="alert" hidden></p>
+        </form>
+        <p class="hint">Hint: <code>demo / demo</code></p>
+      </section>
+
+      <section id="todo-view" hidden aria-labelledby="todo-heading">
+        <header>
+          <h1 id="todo-heading">Todos</h1>
+          <p>
+            Signed in as <strong id="who"></strong>
+            <button id="logout">Sign out</button>
+          </p>
+        </header>
+
+        <form id="add-form">
+          <label>
+            New todo
+            <input id="new-todo" placeholder="What needs doing?" autocomplete="off" />
+          </label>
+          <button type="submit" id="add-todo">Add</button>
+        </form>
+
+        <nav id="filters" aria-label="Filter todos">
+          <button data-filter="all" class="active">All</button>
+          <button data-filter="active">Active</button>
+          <button data-filter="done">Done</button>
+        </nav>
+
+        <ul id="todo-list" aria-live="polite"></ul>
+
+        <footer>
+          <span id="count">0 items</span>
+          <button id="clear-done">Clear completed</button>
+        </footer>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
