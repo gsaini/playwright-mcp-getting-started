@@ -13,7 +13,10 @@
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
-    "check": "biome check ."
+    "check": "biome check .",
+    "spec:compile": "node tools/compile-scenarios/compile.mjs",
+    "spec:compile:ollama": "node tools/compile-scenarios/compile.mjs --provider=ollama",
+    "spec:compile:dry-run": "node tools/compile-scenarios/compile.mjs --dry-run"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

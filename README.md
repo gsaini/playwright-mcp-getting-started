@@ -71,6 +71,8 @@ theming via `@theme` + a `dark` custom variant).
 | [validator/scenarios/checkout.mjs](validator/scenarios/checkout.mjs) | Form validation, happy path, order number |
 | [validator/scenarios/theme.mjs](validator/scenarios/theme.mjs) | Light / dark / system, persistence |
 | [validator/scenarios/visual.mjs](validator/scenarios/visual.mjs) | Full-page screenshots |
+| [validator/scenarios/*.feature](validator/scenarios/) | Plain-English specs — compile to `.mjs` via `pnpm spec:compile` |
+| [tools/compile-scenarios/](tools/compile-scenarios/) | LLM-powered `.feature` → `.mjs` compiler (Anthropic / Ollama) |
 | [biome.json](biome.json) | Biome config (lint + format) |
 
 ## Quick start
@@ -96,6 +98,39 @@ node validator/run.mjs --start-app --headed
 
 Screenshots land in [screenshots/](screenshots/) (catalogue in light + dark
 themes, plus a product-detail capture).
+
+### Plain-English specs (optional)
+
+Each scenario group also exists as a **Gherkin-style `.feature` file** under
+[validator/scenarios/](validator/scenarios/). These can be compiled to the
+runtime `.mjs` files via an LLM, so the model only runs at *authoring time* —
+`pnpm demo` itself stays deterministic and LLM-free.
+
+```bash
+# Compile all 6 .feature files. Defaults to Anthropic / claude-opus-4-7.
+ANTHROPIC_API_KEY=sk-... pnpm spec:compile
+
+# Or use a local Ollama install instead — no API key, no network egress.
+pnpm spec:compile:ollama --model=qwen2.5-coder:14b
+
+# Print the system prompt and target list without calling any model.
+pnpm spec:compile:dry-run
+
+# Compile a single feature.
+pnpm spec:compile --only=auth,catalog
+```
+
+The compiler is intentionally **SDK-agnostic** — it speaks raw HTTP to both
+providers, so the project has no `@anthropic-ai/sdk` / `@ollama/*` dependency
+to track or upgrade.
+
+On the Anthropic path, the system prompt (helpers vocabulary + harness +
+worked example) is sent once with `cache_control: ephemeral`; subsequent
+files in the same batch read from cache at ~10% of base input cost. Verify
+this in the per-file log line, which prints `cache hit` or `cache write`.
+
+The generated `.mjs` files carry a `AUTO-GENERATED` header — edit the
+`.feature` and recompile rather than hand-editing the output.
 
 ### Lint & format
 
