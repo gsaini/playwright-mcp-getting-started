@@ -26,7 +26,8 @@ import { parseArgs } from "node:util";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = dirname(dirname(HERE));
-const SCENARIOS_DIR = join(ROOT, "validator/scenarios");
+const FEATURES_DIR = join(ROOT, "validator/features"); // input — handwritten specs
+const SCENARIOS_DIR = join(ROOT, "validator/scenarios"); // output — generated .mjs
 const HELPERS_PATH = join(ROOT, "validator/lib/helpers.mjs");
 const HARNESS_PATH = join(ROOT, "validator/lib/harness.mjs");
 const SNAPSHOT_PATH = join(ROOT, "validator/lib/snapshot.mjs");
@@ -273,12 +274,12 @@ function extractCode(text) {
 // ───── Main ────────────────────────────────────────────────────────────────
 
 async function main() {
-  if (!existsSync(SCENARIOS_DIR)) {
-    throw new Error(`scenarios directory not found: ${SCENARIOS_DIR}`);
+  if (!existsSync(FEATURES_DIR)) {
+    throw new Error(`features directory not found: ${FEATURES_DIR}`);
   }
-  const allFeatures = (await readdir(SCENARIOS_DIR)).filter((f) => f.endsWith(".feature"));
+  const allFeatures = (await readdir(FEATURES_DIR)).filter((f) => f.endsWith(".feature"));
   if (allFeatures.length === 0) {
-    console.log("No .feature files found in validator/scenarios/.");
+    console.log("No .feature files found in validator/features/.");
     return;
   }
 
@@ -309,8 +310,8 @@ async function main() {
 
   for (const featureFile of targets) {
     const name = basename(featureFile, ".feature");
-    const featureText = await readFile(join(SCENARIOS_DIR, featureFile), "utf8");
-    const userPrompt = `Compile this feature file into a Playwright MCP scenario module.\n\nFEATURE FILE: scenarios/${featureFile}\n\n${featureText}`;
+    const featureText = await readFile(join(FEATURES_DIR, featureFile), "utf8");
+    const userPrompt = `Compile this feature file into a Playwright MCP scenario module.\n\nFEATURE FILE: features/${featureFile}\n\n${featureText}`;
 
     process.stdout.write(`  • ${featureFile} → ${name}.mjs ... `);
     const started = Date.now();
@@ -325,7 +326,7 @@ async function main() {
     const ms = Date.now() - started;
 
     const header = `/**
- * @file AUTO-GENERATED from scenarios/${featureFile} by tools/compile-scenarios.
+ * @file AUTO-GENERATED from features/${featureFile} by tools/compile-scenarios.
  * DO NOT EDIT BY HAND. Edit the .feature file and re-run \`pnpm spec:compile\`.
  *
  * Compiled: ${new Date().toISOString()}

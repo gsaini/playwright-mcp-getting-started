@@ -71,7 +71,7 @@ theming via `@theme` + a `dark` custom variant).
 | [validator/scenarios/checkout.mjs](validator/scenarios/checkout.mjs) | Form validation, happy path, order number |
 | [validator/scenarios/theme.mjs](validator/scenarios/theme.mjs) | Light / dark / system, persistence |
 | [validator/scenarios/visual.mjs](validator/scenarios/visual.mjs) | Full-page screenshots |
-| [validator/scenarios/*.feature](validator/scenarios/) | Plain-English specs — compile to `.mjs` via `pnpm spec:compile` |
+| [validator/features/*.feature](validator/features/) | Plain-English specs (hand-written) — compile to `.mjs` via `pnpm spec:compile` |
 | [tools/compile-scenarios/](tools/compile-scenarios/) | LLM-powered `.feature` → `.mjs` compiler (Anthropic / Ollama) |
 | [biome.json](biome.json) | Biome config (lint + format) |
 
@@ -101,10 +101,15 @@ themes, plus a product-detail capture).
 
 ### Plain-English specs (optional)
 
-Each scenario group also exists as a **Gherkin-style `.feature` file** under
-[validator/scenarios/](validator/scenarios/). These can be compiled to the
-runtime `.mjs` files via an LLM, so the model only runs at *authoring time* —
-`pnpm demo` itself stays deterministic and LLM-free.
+Two directories, two responsibilities:
+
+```text
+validator/features/   hand-written .feature specs   (source of truth)
+validator/scenarios/  generated .mjs scenarios      (committed; CI runs these)
+```
+
+Compile from one to the other via an LLM — the model only runs at *authoring
+time*. `pnpm demo` itself stays deterministic and LLM-free.
 
 ```bash
 # Compile all 6 .feature files. Defaults to Anthropic / claude-opus-4-7.
