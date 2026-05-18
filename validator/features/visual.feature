@@ -1,26 +1,23 @@
 Feature: Visual snapshots
-  Capture full-page PNGs at three points in the flow. There's no DOM-level
-  assertion — these artefacts are for humans (or for diffing against a
-  baseline if that's wired up later).
+  Capture full-page PNGs of the catalogue in both themes and one product
+  detail page. There are no DOM-level assertions — the artefacts are for
+  humans (or for diffing against a baseline if that's wired up later).
 
   Group: visual
-  Function signature: (mcp, APP_URL, SHOTS_DIR)
-  Extra import: { join } from "node:path"
+  Exports: visualScenarios(mcp, APP_URL, SHOTS_DIR)
 
-  Scenario: catalogue in light theme
-    When I navigate to APP_URL
-    And I click the radio "Light theme"
-    And I wait for the text "Catalogue" to appear
-    Then I capture a screenshot at join(SHOTS_DIR, "catalog-light.png")
+  Background
+    Navigate to APP_URL fresh. The user is still signed in from the auth
+    scenarios — no need to re-authenticate.
 
-  Scenario: catalogue in dark theme
-    When I click the radio "Dark theme"
-    And I yield one animation frame
-      (await evaluate(mcp, () => new Promise(r => requestAnimationFrame(r))))
-      to let the color transition settle
-    Then I capture a screenshot at join(SHOTS_DIR, "catalog-dark.png")
+  Scenario: capture the catalogue in light theme
+    Switch to Light, wait for the catalogue heading, capture a screenshot
+    as catalog-light.png in SHOTS_DIR.
 
-  Scenario: product detail page
-    When I click the "Luna Studio Headphones" link
-    And I wait for the text "planar-magnetic" to appear
-    Then I capture a screenshot at join(SHOTS_DIR, "product-detail.png")
+  Scenario: capture the catalogue in dark theme
+    Switch to Dark (let the color transition settle for one animation frame)
+    and capture as catalog-dark.png in SHOTS_DIR.
+
+  Scenario: capture a product detail page
+    Open Luna Studio Headphones from the catalogue and capture the detail
+    page as product-detail.png in SHOTS_DIR.

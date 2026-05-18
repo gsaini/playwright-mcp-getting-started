@@ -1,28 +1,26 @@
 Feature: Theme toggle
-  Three-way Light / System / Dark picker in the header. Each option is
-  rendered as a role="radio" button with aria-label "<Mode> theme".
-  Preference is persisted to localStorage["nimbus.theme"].
+  Three-way theme picker in the header — Light, System, Dark. The
+  preference is persisted to localStorage. Dark mode toggles a `dark`
+  class on the <html> element.
 
   Group: theme
-  Function signature: (mcp)
+  Exports: themeScenarios(mcp)
 
-  Scenario: light theme removes the .dark class from <html>
-    When I click the radio "Light theme"
-    And I wait one render via waitForRender
-    Then document.documentElement.classList.contains("dark") should equal false
+  Background
+    The checkout scenarios left the browser on /checkout/success. The
+    theme picker is reachable from the header on any signed-in screen.
 
-  Scenario: dark theme adds the .dark class to <html>
-    When I click the radio "Dark theme"
-    And I wait one render
-    Then document.documentElement.classList.contains("dark") should equal true
+  Scenario: selecting Light removes the dark class from <html>
+    Picking the Light option in the theme picker should leave the page
+    without the `.dark` class on the root element.
 
-  Scenario: preference persists to localStorage
-    Then localStorage.getItem("nimbus.theme") should equal "dark"
+  Scenario: selecting Dark adds the dark class to <html>
+    Picking the Dark option should put `.dark` on the root element.
 
-  Scenario: system theme defers to the OS preference
-    When I click the radio "System theme"
-    And I wait one render
-    Then localStorage.getItem("nimbus.theme") should equal "system"
-    And the radio[aria-label="System theme"] should have ariaChecked === "true"
-    Note: don't assert .dark here — that depends on the host OS preference.
-    Use assert(...) for the aria-checked check.
+  Scenario: the preference persists to localStorage
+    After picking Dark, localStorage["nimbus.theme"] should equal "dark".
+
+  Scenario: selecting System defers to the OS preference
+    Picking System should set localStorage["nimbus.theme"] to "system".
+    The System option in the radio group should report as checked.
+    Do not assert on the .dark class — that depends on the host OS.

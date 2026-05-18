@@ -104,38 +104,87 @@ themes, plus a product-detail capture).
 Two directories, two responsibilities:
 
 ```text
-validator/features/   hand-written .feature specs   (source of truth)
+validator/features/   intent-level .feature specs   (hand-written; source of truth)
 validator/scenarios/  generated .mjs scenarios      (committed; CI runs these)
 ```
 
-Compile from one to the other via an LLM — the model only runs at *authoring
-time*. `pnpm demo` itself stays deterministic and LLM-free.
+The compiler is an **agentic LLM** that drives the live app via Playwright
+MCP at *compile time* to discover the real DOM, then emits a deterministic
+`.mjs`. At *runtime* (`pnpm demo`) the saved `.mjs` runs with no LLM —
+that's the whole point.
+
+```text
+COMPILE TIME (occasional)                   RUNTIME (every pnpm demo / CI run)
+┌────────────┐                              ┌──────────────┐
+│ .feature   │ ─────┐                       │ scenarios/   │
+│ (intent)   │      ▼                       │ *.mjs        │
+└────────────┘  ┌────────┐                  │ (committed)  │
+                │  LLM   │                  └──────┬───────┘
+                │ + tools│                         │
+                └───┬────┘                         ▼
+                    │ browser_navigate,    ┌──────────────────┐
+                    ▼ snapshot, click…    │  validator/run   │
+       ┌──────────────────────┐            │  (deterministic) │
+       │  @playwright/mcp     │ ◄───────── └─────┬────────────┘
+       │  ↳ Vite app on :5173 │                  │ same MCP server
+       └──────────────────────┘ ◄────────────────┘ same tools
+                    │
+                    ▼ write_scenario(code)
+              scenarios/*.mjs
+```
+
+#### Compiling
 
 ```bash
-# Compile all 6 .feature files. Defaults to Anthropic / claude-opus-4-7.
+# Anthropic (default)
 ANTHROPIC_API_KEY=sk-... pnpm spec:compile
 
-# Or use a local Ollama install instead — no API key, no network egress.
+# Local Ollama (no API key, no network egress; needs a tool-use-capable model)
 pnpm spec:compile:ollama --model=qwen2.5-coder:14b
 
-# Print the system prompt and target list without calling any model.
+# Print the plan only — no Vite spawn, no model call
 pnpm spec:compile:dry-run
 
-# Compile a single feature.
+# Subset of features
 pnpm spec:compile --only=auth,catalog
+
+# Raise the per-feature tool-use cap if a complex feature needs it
+pnpm spec:compile --max-turns=80
 ```
 
 The compiler is intentionally **SDK-agnostic** — it speaks raw HTTP to both
-providers, so the project has no `@anthropic-ai/sdk` / `@ollama/*` dependency
+providers, so the project carries no `@anthropic-ai/sdk` / `ollama` package
 to track or upgrade.
 
-On the Anthropic path, the system prompt (helpers vocabulary + harness +
-worked example) is sent once with `cache_control: ephemeral`; subsequent
-files in the same batch read from cache at ~10% of base input cost. Verify
-this in the per-file log line, which prints `cache hit` or `cache write`.
+#### What the compiler does, step by step
 
-The generated `.mjs` files carry a `AUTO-GENERATED` header — edit the
-`.feature` and recompile rather than hand-editing the output.
+1. Spawns `vite app` (the demo app) and `@playwright/mcp` (the browser
+   driver).
+2. For each `.feature` file, navigates the browser to a fresh state and
+   hands the LLM a tool-use loop with these tools:
+   - `browser_navigate`, `browser_snapshot`, `browser_click`,
+     `browser_type`, `browser_press_key`, `browser_wait_for`,
+     `browser_evaluate` — proxied straight through to MCP.
+   - `write_scenario({ code })` — terminal tool. The LLM calls this exactly
+     once when it has explored enough to write a complete `.mjs`.
+3. Captures the `code` argument, prepends an `AUTO-GENERATED` header, and
+   writes `validator/scenarios/<name>.mjs`.
+4. Tears down Vite + MCP.
+
+#### Determinism trade-offs
+
+- **At compile time** the LLM observes a *live* browser. JSX with dynamic
+  classNames, conditional rendering, computed `aria-label` strings — all
+  resolved. The model writes selectors against what it *saw*, not what
+  the source code *says*.
+- **At runtime** the generated `.mjs` is plain code. Same Playwright MCP
+  server, same helpers, no model — every run is identical given the same
+  app build.
+- **Cost** is paid once per compile and amortized over every CI run.
+  Anthropic-side caching makes files 2–N in a batch ~10× cheaper than file 1
+  (look for `cache hit` in the per-feature log line).
+
+Edit the `.feature` and recompile — do not hand-edit the generated `.mjs`.
 
 ### Lint & format
 

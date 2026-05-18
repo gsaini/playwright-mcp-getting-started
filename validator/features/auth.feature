@@ -1,37 +1,26 @@
 Feature: Authentication
-  Login flow, validation errors, and post-auth redirects.
-  Mock credentials: demo / demo (see app/src/hooks/useAuth.jsx).
+  The app uses mock credentials (username "demo", password "demo"). A
+  successful sign-in redirects to the catalogue at "/". An unauthenticated
+  visitor is bounced to "/login".
 
   Group: auth
-  Function signature: (mcp, APP_URL)
+  Exports: authScenarios(mcp, APP_URL)
 
-  Scenario: redirects unauthenticated visitors to /login
-    When I navigate to APP_URL
-    And I wait for the text "Welcome back" to appear
-    Then the current URL should end with "/login"
+  Background
+    Start at APP_URL with no prior session.
 
-  Scenario: renders the login form fields
-    Then a fresh snapshot should contain:
-      - heading "Welcome back"
-      - textbox "Username"
-      - textbox "Password"
-      - button "Sign in"
-    Use findOne against the parsed snapshot nodes for each.
+  Scenario: unauthenticated visitors land on the login screen
+    Hitting the home page when signed out should leave the browser
+    sitting on the login route.
 
-  Scenario: rejects invalid credentials with an inline error
-    When I type "demo" into the "Username" textbox
-    And I type "wrong" into the "Password" textbox
-    And I click the "Sign in" button
-    And I wait for the text "Invalid username or password" to appear
-    Then the current URL should still end with "/login"
-    Assert the URL with assert(...).
+  Scenario: the login form renders the expected fields
+    The login screen should expose a username textbox, a password textbox,
+    and a submit button — addressable by accessible name.
 
-  Scenario: redirects to the catalogue after a successful sign-in
-    Given the previous scenario typed "wrong" into the password field
-    When I set the password to "demo" via setReactInputValue on "#password"
-      (direct el.value = ... will not propagate to React's controlled input)
-    And I click the "Sign in" button
-    And I wait for the text "Catalogue" to appear
-    Then the URL path (new URL(currentUrl).pathname) should equal "/"
-    And the element [data-testid="user-name"] should have textContent "Demo Shopper"
-    Use assertEqual for both checks.
+  Scenario: invalid credentials yield an inline error
+    Submitting wrong credentials should surface an inline error and keep
+    the visitor on /login.
+
+  Scenario: valid credentials redirect to the catalogue
+    Submitting "demo / demo" should put the user on the catalogue and
+    show their display name somewhere in the header chrome.
