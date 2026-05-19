@@ -1,0 +1,25 @@
+{
+  // markdownlint rules: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+  "config": {
+    "default": true,
+
+    // Line length — README intentionally uses wide prose plus long URLs in
+    // shields.io badge tags; hard-wrapping at 80 would just churn the diff.
+    "MD013": false,
+
+    // Inline HTML — we use a few <br>, <details>, and the markdown reader
+    // renders raw HTML in some platforms.
+    "MD033": false,
+
+    // Duplicate headings — fine when nested under different parents (e.g.
+    // multiple "Usage" sections in different feature docs).
+    "MD024": { "siblings_only": true },
+
+    // ATX-style headings only (no underlined === / ---). Default; explicit
+    // here as a reminder for contributors.
+    "MD003": { "style": "atx" }
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules/**", "app/dist/**", ".playwright-mcp/**"],
+  "gitignore": true
+}

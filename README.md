@@ -188,14 +188,27 @@ Edit the `.feature` and recompile — do not hand-edit the generated `.mjs`.
 
 ### Lint & format
 
-[Biome](https://biomejs.dev) handles both linting and formatting:
+[Biome](https://biomejs.dev) handles JS / JSX / JSON;
+[markdownlint-cli2](https://github.com/DavidAnson/markdownlint-cli2) handles
+Markdown.
 
 ```bash
-pnpm lint         # report issues
-pnpm lint:fix     # auto-fix what's safe
-pnpm format       # rewrite files to the canonical style
-pnpm check        # lint + format check, CI-friendly
+pnpm lint         # Biome lint
+pnpm lint:fix     # Biome lint + autofix
+pnpm lint:md      # markdownlint
+pnpm lint:md:fix  # markdownlint + autofix
+pnpm format       # Biome format (rewrites to canonical style)
+pnpm check        # Biome check + markdownlint — CI-friendly, runs both gates
 ```
+
+Rule configuration:
+
+- Biome: [biome.json](biome.json) — JSX-aware, ES module style, 100-col wrap.
+- markdownlint: [.markdownlint-cli2.jsonc](.markdownlint-cli2.jsonc) — default
+  rule set with `MD013` (line length) and `MD033` (inline HTML) disabled
+  because the README intentionally uses wide prose and shields.io badge
+  markup. `MD024` is restricted to `siblings_only` so the same heading
+  text can appear under different parents.
 
 ## What the demo validates
 
