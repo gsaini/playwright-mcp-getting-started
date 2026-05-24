@@ -210,6 +210,51 @@ Rule configuration:
   markup. `MD024` is restricted to `siblings_only` so the same heading
   text can appear under different parents.
 
+## MCP-LIVE — authoring with a live browser
+
+**MCP-LIVE** = author / repair compiled tests with a real browser open,
+observing the real DOM at each step. The `mcp__playwright__*` tool family
+drives a Playwright browser session against the running app
+(`http://localhost:5173` locally, `https://<env>.frado.ai` in deployed
+environments), takes DOM snapshots, runs `browser_evaluate` to inspect
+specific nodes, and the resulting locators go straight into the committed
+test files — [validator/scenarios/](validator/scenarios/) `*.mjs` in this
+repo (the same role `tests-compiled/**/*.spec.ts` plays in TypeScript
+Playwright layouts).
+
+**It's not** a separate runtime. The compiled tests still execute via plain
+Playwright in CI. MCP-LIVE only changes how the tests are *written*.
+
+```text
+AUTHORING (MCP-LIVE)                       RUNTIME (CI / pnpm demo)
+┌──────────────────┐                       ┌──────────────────┐
+│ human or LLM     │                       │ scenarios/*.mjs  │
+│ at the keyboard  │                       │  (committed)     │
+└────────┬─────────┘                       └────────┬─────────┘
+         │ mcp__playwright__*                       │ plain Playwright
+         ▼  (snapshot, evaluate, click)             ▼  (no MCP author loop)
+┌──────────────────┐                       ┌──────────────────┐
+│ live browser     │                       │ headless browser │
+│ on real app      │                       │ on real app      │
+└──────────────────┘                       └──────────────────┘
+         │
+         ▼  paste locator
+   scenarios/*.mjs
+```
+
+Two forms of the same pattern:
+
+- **Automated** — the [LLM compiler](#what-the-compiler-does-step-by-step)
+  drives the MCP browser, explores, and emits the `.mjs`. Run it when a
+  `.feature` changes.
+- **Manual** — open the MCP browser yourself when a selector goes flaky or
+  you're sketching a new scenario. Snapshot the page, `browser_evaluate`
+  the node you care about, paste the locator into the scenario file. Same
+  tools, same DOM truth — just no model in the loop.
+
+In both cases the artifact that ships is a plain Playwright file; MCP is
+the authoring surface, not the runtime.
+
 ## What the demo validates
 
 Six feature groups, **32 scenarios** total:
