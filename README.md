@@ -186,6 +186,61 @@ to track or upgrade.
 
 Edit the `.feature` and recompile — do not hand-edit the generated `.mjs`.
 
+#### Tagging scenarios
+
+Tags use standard Gherkin `@tag` syntax — one or more whitespace-separated
+tags on the line directly above a `Feature:` or `Scenario:`. Tags on
+`Feature:` cascade to every scenario in the file; tags on `Scenario:` are
+local to that scenario.
+
+Keep tags to **two axes** that map to real commands. Avoid area tags
+(`@auth`, `@cart`) — the filename already encodes that, and `--only=` covers
+file-level filtering.
+
+| Axis | Tag | Meaning |
+| --- | --- | --- |
+| Priority | `@smoke` | Runs on every PR — keep the set tiny and fast |
+| Priority | `@regression` | Full nightly / pre-release suite |
+| Priority | `@slow` | Expensive scenarios (e.g. visual diffs) — skip in fast loops |
+| Lifecycle | `@wip` | Compiler skips; not ready for CI |
+| Lifecycle | `@flaky` | Validator soft-fails or retries; under investigation |
+
+Example:
+
+```gherkin
+@smoke
+Feature: Authentication
+  ...
+
+  Scenario: valid credentials redirect to the catalogue
+    ...
+
+  @flaky
+  Scenario: session persists across reloads
+    ...
+```
+
+Filter at the command line — `--tags=` intersects with `--only=`:
+
+```bash
+pnpm spec:compile --tags=@smoke              # compile smoke set only
+pnpm spec:compile --tags=@smoke,@regression  # union: either tag
+pnpm spec:compile --tags=@smoke --tags-not=@flaky  # smoke minus flaky
+pnpm validate --tags=@smoke                  # filter the run, not the compile
+```
+
+The compiler emits resolved tags into the generated `.mjs` as a
+`tags: [...]` array on each `scenario(...)` call, so the validator can
+filter at run time without re-parsing `.feature` files. Resolved means
+cascade-merged: a `@smoke` `Feature:` with a `@flaky` `Scenario:` ends up
+with `tags: ["smoke", "flaky"]`.
+
+**When to skip tags entirely**: if file-level (`--only=auth,catalog`)
+granularity is always enough, don't introduce tags — they're a second
+filtering surface that pays off only once you need *sub-file* control
+(one slow scenario inside an otherwise fast feature, a single flaky case
+you want to quarantine without yanking its siblings).
+
 ### Lint & format
 
 [Biome](https://biomejs.dev) handles JS / JSX / JSON;
